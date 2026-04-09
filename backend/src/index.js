@@ -16,9 +16,12 @@ app.use(express.json()); // Body parser
 // Routes
 app.use('/api/tasks', taskRoutes);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'success', message: 'API is running smoothly' });
+// Render Health Check endpoint (Root)
+app.get('/', (req, res) => {
+  res.json({
+    status: "success",
+    message: "TaskFlow API is running 🚀"
+  });
 });
 
 // Error handlers
