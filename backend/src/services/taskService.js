@@ -2,11 +2,9 @@ const { db } = require('../config/firebase');
 
 const collectionName = 'tasks';
 
-// Get all tasks for a specific user, ordered by creation date
-const getAllTasks = async (userId) => {
-  const snapshot = await db.collection(collectionName)
-    .where('userId', '==', userId)
-    .get();
+// Get all tasks, ordered by creation date
+const getAllTasks = async () => {
+  const snapshot = await db.collection(collectionName).get();
   
   const tasks = [];
   snapshot.forEach(doc => {
@@ -23,13 +21,12 @@ const getAllTasks = async (userId) => {
   return tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 };
 
-// Get single task (ensuring user owns it)
-const getTaskById = async (id, userId) => {
+// Get single task
+const getTaskById = async (id) => {
   const doc = await db.collection(collectionName).doc(id).get();
   if (!doc.exists) return null;
   
   const data = doc.data();
-  if (data.userId !== userId) return null;
 
   return {
     id: doc.id,
@@ -39,13 +36,12 @@ const getTaskById = async (id, userId) => {
   };
 };
 
-// Create a new task tied to a user
-const createTask = async (taskData, userId) => {
+// Create a new task
+const createTask = async (taskData) => {
   const newTask = {
     title: taskData.title,
     description: taskData.description || '',
     completed: false,
-    userId, // Tie task to user
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -54,13 +50,12 @@ const createTask = async (taskData, userId) => {
   return { id: docRef.id, ...newTask };
 };
 
-// Update an existing task (if owned by user)
-const updateTask = async (id, updateData, userId) => {
+// Update an existing task
+const updateTask = async (id, updateData) => {
   const docRef = db.collection(collectionName).doc(id);
   const doc = await docRef.get();
   
   if (!doc.exists) return null;
-  if (doc.data().userId !== userId) return null;
 
   const updatedTask = {
     ...updateData,
@@ -72,13 +67,12 @@ const updateTask = async (id, updateData, userId) => {
   return { id, ...(doc.data()), ...updatedTask };
 };
 
-// Delete a task (if owned by user)
-const deleteTask = async (id, userId) => {
+// Delete a task
+const deleteTask = async (id) => {
   const docRef = db.collection(collectionName).doc(id);
   const doc = await docRef.get();
   
   if (!doc.exists) return null;
-  if (doc.data().userId !== userId) return null;
 
   await docRef.delete();
   return id;
