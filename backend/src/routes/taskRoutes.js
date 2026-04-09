@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
-// const { protect } = require('../middlewares/authMiddleware'); ❌ remove
+const { protect } = require('../middlewares/authMiddleware');
 const {
   getTasks,
   getTask,
   createTask,
   updateTask,
   deleteTask
-} = require('../controllers/taskController);
+} = require('../controllers/taskController');
 
 // Validation rules
 const taskValidation = [
@@ -21,7 +21,8 @@ const updateValidation = [
   check('completed', 'Completed must be a boolean').optional().isBoolean(),
 ];
 
-// ✅ No auth middleware
+// Combine routes and protect them
+// router.use(protect); // This will protect all routes attached below
 
 router.route('/')
   .get(getTasks)
