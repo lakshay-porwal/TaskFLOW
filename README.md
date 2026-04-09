@@ -1,4 +1,4 @@
-# Task Manager - Technical Assignment
+# TaskFLOW
 
 A highly scalable, production-ready full-stack Task Manager application built with React, Node.js, Express, and Firebase. This project was designed with a focus on clean architecture, seamless user experience, and modern UI paradigms.
 
