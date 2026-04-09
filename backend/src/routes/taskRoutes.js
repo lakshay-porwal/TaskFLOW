@@ -22,7 +22,7 @@ const updateValidation = [
 ];
 
 // Combine routes and protect them
-// router.use(protect); // This will protect all routes attached below
+router.use(protect); // This will protect all routes attached below
 
 router.route('/')
   .get(getTasks)

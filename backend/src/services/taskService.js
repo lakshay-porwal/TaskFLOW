@@ -2,9 +2,11 @@ const { db } = require('../config/firebase');
 
 const collectionName = 'tasks';
 
-// Get all tasks, ordered by creation date
-const getAllTasks = async () => {
-  const snapshot = await db.collection(collectionName).get();
+// Get all tasks for a specific user, combining filter with js sort to avoid index error
+const getAllTasks = async (userId) => {
+  const snapshot = await db.collection(collectionName)
+    .where("userId", "==", userId)
+    .get();
   
   const tasks = [];
   snapshot.forEach(doc => {
@@ -17,16 +19,16 @@ const getAllTasks = async () => {
     });
   });
 
-  // Sort tasks in-memory by createdAt descending
   return tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 };
 
 // Get single task
-const getTaskById = async (id) => {
+const getTaskById = async (id, userId) => {
   const doc = await db.collection(collectionName).doc(id).get();
   if (!doc.exists) return null;
   
   const data = doc.data();
+  if (data.userId !== userId) return null;
 
   return {
     id: doc.id,
@@ -37,11 +39,12 @@ const getTaskById = async (id) => {
 };
 
 // Create a new task
-const createTask = async (taskData) => {
+const createTask = async (taskData, userId) => {
   const newTask = {
     title: taskData.title,
     description: taskData.description || '',
     completed: false,
+    userId, // tie task to user
     createdAt: new Date(),
     updatedAt: new Date()
   };
@@ -51,11 +54,12 @@ const createTask = async (taskData) => {
 };
 
 // Update an existing task
-const updateTask = async (id, updateData) => {
+const updateTask = async (id, updateData, userId) => {
   const docRef = db.collection(collectionName).doc(id);
   const doc = await docRef.get();
   
   if (!doc.exists) return null;
+  if (doc.data().userId !== userId) return null;
 
   const updatedTask = {
     ...updateData,
@@ -68,11 +72,12 @@ const updateTask = async (id, updateData) => {
 };
 
 // Delete a task
-const deleteTask = async (id) => {
+const deleteTask = async (id, userId) => {
   const docRef = db.collection(collectionName).doc(id);
   const doc = await docRef.get();
   
   if (!doc.exists) return null;
+  if (doc.data().userId !== userId) return null;
 
   await docRef.delete();
   return id;
